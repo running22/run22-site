@@ -4,6 +4,7 @@ import { render } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import { siteConfig } from '../site.config';
 import { entryPath } from '../utils/content';
+import SideToc from '../components/SideToc.astro';
 import Comments from '../components/Comments.astro';
 import CodeCopyButton from '../components/CodeCopyButton.astro';
 import Mermaid from '../components/Mermaid.astro';
@@ -31,7 +32,17 @@ const updatedDate = post.data.updatedDate
 // 阅读时长：中文约 400 字/分钟
 const readingMinutes = Math.max(1, Math.round(post.body.length / 400));
 
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+
+// 博客文章没有「系列文章列表」，目录改为正文标题；
+// 按 Markdown 中 # 的数量生成树形层级（h1 为根，h2/h3… 逐级缩进）。
+const tocItems = headings.map((heading, index) => ({
+  href: `#${heading.slug}`,
+  title: heading.text,
+  depth: heading.depth,
+  targetId: heading.slug,
+  active: index === 0,
+}));
 
 // JSON-LD: BlogPosting 结构化数据
 const jsonLd = JSON.stringify({
@@ -55,15 +66,31 @@ const jsonLd = JSON.stringify({
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description} image={post.data.cover} jsonLd={jsonLd}>
-  <div class="container py-12 sm:py-16">
-    <!-- Back -->
-    <a href="/blog" class="font-mono text-xs uppercase tracking-[0.15em] text-faint hover:text-accent transition-colors">
-      ← 返回博客
-    </a>
+  <div class="relative max-w-[90rem] mx-auto px-5 sm:px-8 py-12 sm:py-16">
+    <!-- Sidebar: TOC —— 与系列文章页共用同一套目录组件 -->
+    <SideToc
+      backHref="/blog"
+      backLabel="返回博客"
+      eyebrow="本页目录"
+      items={tocItems}
+      current={1}
+      total={tocItems.length}
+      scrollSpy={true}
+    />
 
-    <!-- Article -->
-    <article class="mt-8">
-      <header class="mb-12">
+    <!-- Main content：水平居中 -->
+    <div class="max-w-[56rem] mx-auto">
+      <!-- Mobile / 窄屏返回与目录 -->
+      <a
+        href="/blog"
+        class="min-[1440px]:hidden font-mono text-xs uppercase tracking-[0.15em] text-faint hover:text-accent transition-colors inline-block mb-2"
+      >
+        ← 返回博客
+      </a>
+
+      <!-- Article -->
+      <article class="mt-8">
+        <header class="mb-12">
           {post.data.category && (
             <a
               href={`/tags/${encodeURIComponent(post.data.category)}`}
@@ -142,7 +169,8 @@ const jsonLd = JSON.stringify({
         )}
       </nav>
 
-        {/* 评论 */}
-        <Comments pageOnly />
+      {/* 评论 */}
+      <Comments pageOnly />
+    </div>
   </div>
 </BaseLayout>

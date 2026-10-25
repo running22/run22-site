@@ -1,0 +1,176 @@
+---
+interface TocItem {
+  href: string;
+  title: string;
+  /** Markdown 标题级别（# 的数量），用于生成树形缩进 */
+  depth: number;
+  /** 页面内标题锚点 id */
+  targetId?: string;
+  active?: boolean;
+}
+
+interface Props {
+  backHref: string;
+  backLabel: string;
+  /** 目录上方的眉题：系列页为系列名，博客页为「本页目录」 */
+  eyebrow: string;
+  items: TocItem[];
+  /** 移动端折叠摘要中的当前位置 */
+  current?: number;
+  total?: number;
+  /** 单页内标题目录：随滚动高亮当前小节 */
+  scrollSpy?: boolean;
+}
+
+const { backHref, backLabel, eyebrow, items, current, total, scrollSpy = false } = Astro.props;
+const progress = current != null && total != null ? `${current}/${total}` : String(items.length);
+
+// 以当前文章中最浅的标题级别为树根，按 # 的数量逐级缩进
+const minDepth = items.length > 0 ? Math.min(...items.map((item) => item.depth)) : 0;
+const indent = (depth: number, base: number, step: number) =>
+  `${base + Math.max(0, depth - minDepth) * step}rem`;
+---
+
+<!-- 桌面端：绝对定位浮动在正文左侧，不占文档流 -->
+<aside class="hidden min-[1440px]:block absolute left-0 top-12 sm:top-16 w-56">
+  <div class="sticky top-20">
+    <a
+      href={backHref}
+      class="font-mono text-xs uppercase tracking-[0.15em] text-faint hover:text-accent transition-colors block mb-5"
+    >
+      ← {backLabel}
+    </a>
+    <p class="eyebrow mb-3">{eyebrow}</p>
+    {items.length > 0 && (
+      <nav class="border-l border-line max-h-[calc(100vh-12rem)] overflow-y-auto pr-1">
+        {items.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'flex items-baseline gap-2 pl-4 py-1.5 text-sm border-l-2 -ml-px transition-colors',
+              item.active
+                ? 'border-accent text-accent font-medium'
+                : 'border-transparent text-muted hover:text-ink hover:border-faint',
+            ]}
+            data-toc-item
+            data-toc-variant="sidebar"
+            data-toc-target={item.targetId}
+            style={`padding-left: ${indent(item.depth, 1, 0.85)}`}
+          >
+            <span class="line-clamp-1">{item.title}</span>
+          </a>
+        ))}
+      </nav>
+    )}
+  </div>
+</aside>
+
+<!-- 移动端 / 窄屏：折叠目录 -->
+{items.length > 0 && (
+  <details class="min-[1440px]:hidden mb-6">
+    <summary class="cursor-pointer font-mono text-xs uppercase tracking-[0.15em] text-muted hover:text-accent transition-colors py-1" data-toc-summary>
+      目录 {progress}
+    </summary>
+    <nav class="mt-2 border border-line rounded-lg p-3 text-sm">
+      {items.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            'flex items-baseline gap-2 py-1.5 px-2 rounded transition-colors',
+            item.active ? 'bg-accentsoft text-accent font-medium' : 'text-muted hover:bg-paper2',
+          ]}
+          data-toc-item
+          data-toc-variant="mobile"
+          data-toc-target={item.targetId}
+          style={`padding-left: ${indent(item.depth, 0.5, 0.875)}`}
+        >
+          <span>{item.title}</span>
+        </a>
+      ))}
+    </nav>
+  </details>
+)}
+
+{scrollSpy && (
+  <script is:inline>
+    (function () {
+      function init() {
+        var links = Array.prototype.slice.call(document.querySelectorAll('[data-toc-item][data-toc-target]'));
+        if (!links.length) return;
+
+        var ids = [];
+        links.forEach(function (link) {
+          var id = link.getAttribute('data-toc-target');
+          if (id && ids.indexOf(id) === -1) ids.push(id);
+        });
+        var headings = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (!headings.length) return;
+
+        var summary = document.querySelector('[data-toc-summary]');
+        var total = headings.length;
+
+        function setActive(id) {
+          links.forEach(function (link) {
+            var active = link.getAttribute('data-toc-target') === id;
+            var sidebar = link.getAttribute('data-toc-variant') === 'sidebar';
+            if (sidebar) {
+              link.classList.toggle('border-accent', active);
+              link.classList.toggle('border-transparent', !active);
+              link.classList.toggle('hover:text-ink', !active);
+              link.classList.toggle('hover:border-faint', !active);
+            } else {
+              link.classList.toggle('bg-accentsoft', active);
+              link.classList.toggle('hover:bg-paper2', !active);
+            }
+            link.classList.toggle('text-accent', active);
+            link.classList.toggle('text-muted', !active);
+            link.classList.toggle('font-medium', active);
+          });
+        }
+
+        var ticking = false;
+        function update() {
+          ticking = false;
+          var offset = 120;
+          var currentIndex = 0;
+          for (var i = 0; i < headings.length; i++) {
+            if (headings[i].getBoundingClientRect().top <= offset) {
+              currentIndex = i;
+            } else {
+              break;
+            }
+          }
+          // 滚动到底部时高亮最后一条
+          if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+            currentIndex = headings.length - 1;
+          }
+          setActive(headings[currentIndex].id);
+          if (summary) summary.textContent = '目录 ' + (currentIndex + 1) + '/' + total;
+        }
+
+        window.addEventListener(
+          'scroll',
+          function () {
+            if (!ticking) {
+              ticking = true;
+              window.requestAnimationFrame(update);
+            }
+          },
+          { passive: true },
+        );
+        window.addEventListener('resize', update, { passive: true });
+        update();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
+    })();
+  </script>
+)}
