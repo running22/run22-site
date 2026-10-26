@@ -39,10 +39,10 @@ export type SiteConfig = {
 
 const siteConfig: SiteConfig = {
   site: {
-    title: 'Sify',
+    title: 'run22',
     description: '个人博客 — 技术笔记、教程与随笔',
-    author: 'Sify',
-    url: 'https://astro-sify-demo.lazy-boy-acmer.cn',
+    author: 'run22',
+    url: 'http://github.com/run22',
     language: 'zh-CN',
   },
   nav: [
@@ -51,17 +51,17 @@ const siteConfig: SiteConfig = {
     { text: '系列', link: '/series' },
     { text: '标签', link: '/tags' },
     { text: '归档', link: '/archives' },
-    { text: '关于', link: '/about' },
-    { text: '项目', link: '/projects' },
-    { text: '友链', link: '/links' },
+    { text: '关于', link: '/about' }
+    // { text: '项目', link: '/projects' },
+    // { text: '友链', link: '/links' },
   ],
   social: {
-    github: 'https://github.com/santisify',
-    email: 'mailto:santisify@qq.com',
+    github: 'https://github.com/run22',
+    email: 'mailto:wlb0730@163.com',
     rss: '/rss.xml',
   },
   footer: {
-    copyright: '© 2026 Sify. All rights reserved.',
+    copyright: '© 2026 run22. All rights reserved.',
     poweredBy: 'Powered by Astro & UnoCSS',
   },
   comments: {
