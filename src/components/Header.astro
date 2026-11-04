@@ -37,7 +37,7 @@ const currentPath = Astro.url.pathname;
           type="button"
           aria-label="切换深浅色主题"
           title="切换深浅色主题"
-          class="p-2 rounded-md text-muted hover:text-ink hover:bg-paper2 transition-colors cursor-pointer"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted hover:text-ink hover:bg-paper2 transition-colors cursor-pointer"
         >
           <!-- 太阳（暗色时显示） -->
           <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,20 +50,23 @@ const currentPath = Astro.url.pathname;
         </button>
 
         <!-- 移动端菜单 -->
-        <details class="md:hidden relative">
-          <summary class="cursor-pointer p-2 rounded-md text-muted hover:text-ink hover:bg-paper2 transition-colors">
+        <details id="mobile-menu" class="md:hidden relative">
+          <summary
+            aria-label="导航菜单"
+            class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-md text-muted hover:text-ink hover:bg-paper2 transition-colors"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </summary>
-          <ul class="absolute right-0 top-12 w-48 py-2 rounded-lg border border-line bg-paper shadow-sm z-50">
+          <ul class="absolute right-0 top-full mt-3 w-48 py-2 rounded-lg border border-line bg-paper shadow-sm z-50">
             {siteConfig.nav.map((item) => {
               const isActive = item.link === '/' ? currentPath === '/' : currentPath.startsWith(item.link);
               return (
                 <li>
                   <a
                     href={item.link}
-                    class:list={['block px-4 py-2 text-sm transition-colors', isActive ? 'text-accent' : 'text-muted hover:text-ink']}
+                    class:list={['block px-4 py-3 text-sm transition-colors', isActive ? 'text-accent' : 'text-muted hover:text-ink']}
                   >
                     {item.text}
                   </a>
@@ -77,6 +80,16 @@ const currentPath = Astro.url.pathname;
   </div>
 </header>
 
+<style>
+  /* 移除 <details> 默认的三角标记，避免移动端菜单出现多余箭头与错位 */
+  header details > summary {
+    list-style: none;
+  }
+  header details > summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
+
 <script is:inline>
   (function () {
     var toggle = document.getElementById('theme-toggle');
@@ -89,5 +102,43 @@ const currentPath = Astro.url.pathname;
         /* ignore */
       }
     });
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    var menu = document.getElementById('mobile-menu');
+    if (!menu) return;
+
+    var summary = menu.querySelector('summary');
+
+    // 点击菜单外部时关闭
+    document.addEventListener('click', function (event) {
+      if (menu.open && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    });
+
+    // 点击导航项后立即收起
+    menu.addEventListener('click', function (event) {
+      if (event.target.closest('a')) menu.open = false;
+    });
+
+    // Esc 关闭并归还焦点
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && menu.open) {
+        menu.open = false;
+        if (summary) summary.focus();
+      }
+    });
+
+    // 页面滚动时关闭，避免菜单遮挡正文
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (menu.open) menu.open = false;
+      },
+      { passive: true },
+    );
   })();
 </script>

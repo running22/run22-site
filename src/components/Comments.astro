@@ -1,34 +1,43 @@
 ---
 import { siteConfig } from '../site.config';
 
-const enabled = siteConfig.comments.enabled;
+const envId = siteConfig.comments.envId;
+// 未配置 envId 时完全隐藏评论区，避免加载 Twikoo CDN 后显示配置错误。
+const enabled = siteConfig.comments.enabled && Boolean(envId);
 ---
-{/* Twikoo 容器 with loading indicator */}
-<div id="twikoo" class="mb-12" data-envId="{envId}">
-  <p class="text-center text-muted py-8">加载中…</p>
-</div>
 
-{/* Twikoo 脚本 */}
-{ enabled && (
-  <> 
+{enabled && (
+  <>
+    {/* Twikoo 容器 with loading indicator */}
+    <div id="twikoo" class="mb-12" data-env-id={envId}>
+      <p class="text-center text-muted py-8">评论加载中…</p>
+    </div>
+
+    {/* Twikoo 脚本 */}
     <script
       src="https://cdn.staticfile.org/twikoo/1.7.19/twikoo.min.js"
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script is:inline define:vars= {{ siteConfig }}>
-      const twikooContainer = document.getElementById('twikoo');
-      const envId = twikooContainer?.dataset.envId;
-      twikoo.init({
-        envId: siteConfig.comments.envId,
-        el: '#twikoo',
-        lang: 'zh-CN',
-        darkMode: 'auto',
-        pathAlias: {
-          '/blog/': '',
-          '/series/': ''
+    <script is:inline define:vars={{ envId }}>
+      if (window.twikoo) {
+        twikoo.init({
+          envId,
+          el: '#twikoo',
+          lang: 'zh-CN',
+          darkMode: 'auto',
+          pathAlias: {
+            '/blog/': '',
+            '/series/': '',
+          },
+        });
+      } else {
+        var container = document.getElementById('twikoo');
+        if (container) {
+          container.innerHTML =
+            '<p class="text-center text-muted py-8">评论加载失败，请稍后重试。</p>';
         }
-      });
+      }
     </script>
   </>
 )}

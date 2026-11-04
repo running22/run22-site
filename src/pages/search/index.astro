@@ -52,21 +52,31 @@ const posts: SearchPost[] = allPosts.map((p) => ({
     const input = document.getElementById('search-input');
     const results = document.getElementById('search-results');
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function renderRow(p, i) {
       const date = new Date(p.pubDate).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
       const tagsHtml = p.tags
         .slice(0, 3)
-        .map(function (t) { return '<span class="group-hover:text-accent transition-colors">#' + t + '</span>'; })
+        .map(function (t) { return '<span class="group-hover:text-accent transition-colors">#' + escapeHtml(t) + '</span>'; })
         .join('');
       return (
-        '<a href="/blog/' + p.slug + '" class="group flex items-baseline gap-4 py-4 border-b border-line">' +
+        '<a href="/blog/' + p.slug + '" class="group flex items-baseline gap-3 sm:gap-4 py-4 border-b border-line">' +
           '<span class="font-mono text-sm text-faint w-8 shrink-0 tabular-nums">' + String(i + 1).padStart(2, '0') + '</span>' +
           '<span class="flex-1 min-w-0">' +
-            '<span class="block font-medium text-ink group-hover:text-accent transition-colors line-clamp-1">' + p.title + '</span>' +
-            '<span class="block text-sm text-muted line-clamp-1 mt-0.5">' + p.description + '</span>' +
-            '<span class="flex flex-wrap gap-x-3 mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-faint">' + tagsHtml + '</span>' +
+            '<span class="block font-medium text-ink group-hover:text-accent transition-colors line-clamp-2 sm:line-clamp-1">' + escapeHtml(p.title) + '</span>' +
+            '<span class="block text-sm text-muted line-clamp-2 sm:line-clamp-1 mt-0.5">' + escapeHtml(p.description) + '</span>' +
+            '<span class="mt-1.5 flex flex-wrap gap-x-3 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-faint">' + tagsHtml + '</span>' +
+            '<time datetime="' + escapeHtml(p.pubDate) + '" class="mt-1.5 block font-mono text-xs text-faint sm:hidden">' + escapeHtml(date) + '</time>' +
           '</span>' +
-          '<time class="font-mono text-xs text-faint shrink-0">' + date + '</time>' +
+          '<time datetime="' + escapeHtml(p.pubDate) + '" class="hidden sm:block font-mono text-xs text-faint shrink-0">' + escapeHtml(date) + '</time>' +
         '</a>'
       );
     }

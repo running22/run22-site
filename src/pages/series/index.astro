@@ -9,6 +9,7 @@ type SeriesGroup = {
   title: string;
   description: string;
   posts: CollectionEntry<'series'>[];
+  count: number;
   cover?: string;
   lastUpdated?: Date;
 };
@@ -35,6 +36,7 @@ for (const [slug, posts] of groups) {
     title: first.data.title,
     description: first.data.description,
     posts: sortedPosts,
+    count: sortedPosts.length,
     cover: first.data.cover,
     lastUpdated: last.data.pubDate,
   });
