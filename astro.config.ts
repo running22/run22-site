@@ -6,7 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
 export default defineConfig({
-  site: 'https://astro-theme-sify-demo.vercel.app/',
+  site: 'https://run22.top',
   legacy: {
     collectionsBackwardsCompat: true,
   },

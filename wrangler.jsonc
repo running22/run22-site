@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "run22-site",
+  "compatibility_date": "2026-10-26",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+  // 域名已接入同一 Cloudflare 账号后，也可以改为在配置中声明自定义域名：
+  // "routes": [{ "pattern": "run22.top", "custom_domain": true }]
+}

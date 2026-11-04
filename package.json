@@ -6,10 +6,13 @@
   "engines": {
     "node": ">=22.12.0"
   },
+  "packageManager": "bun@1.4.4",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "preview:cf": "bun run build && wrangler dev",
+    "deploy": "bun run build && wrangler deploy",
     "astro": "astro",
     "typecheck": "tsc --noEmit"
   },
@@ -28,6 +31,7 @@
     "@unocss/preset-attributify": "^66.7.5",
     "@unocss/preset-wind4": "^66.7.5",
     "typescript": "7.0",
-    "unocss": "^66.7.5"
+    "unocss": "^66.7.5",
+    "wrangler": "^4.152.0"
   }
 }

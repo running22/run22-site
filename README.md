@@ -50,7 +50,9 @@ astro-theme-sify/
 ├── uno.config.ts            # UnoCSS 配置（主题色、shortcuts）
 ├── tsconfig.json
 ├── package.json
+├── wrangler.jsonc           # Cloudflare Workers 部署配置
 ├── public/
+│   ├── _headers             # Cloudflare Workers 响应头
 │   ├── favicon/             # 站点图标
 │   ├── images/              # 头像 / 封面 / OG 占位图
 │   ├── links.json           # 友链数据
@@ -164,14 +166,65 @@ draft: false                    # 可选
 
 ## 🌐 部署
 
-项目为纯静态输出，产物在 `dist/`，可直接部署到任意静态托管：
+项目为纯静态输出，产物在 `dist/`，使用 **Cloudflare Workers Static Assets** 部署。纯静态站点不需要 `@astrojs/cloudflare` 适配器。
 
-- **Vercel**：已提供 `vercel.json`（`bun run build` 构建）
-- **Netlify**：已提供 `netlify.toml`
-- **GitHub Pages**：已提供 `.github/workflows/deploy.yml`（Actions 自动构建发布）
-- 其他平台：构建命令 `bun run build`，输出目录 `dist`
+### 本地构建与预览
 
-> 部署前请将 `src/site.config.ts` 中的 `site.url` 与 `astro.config.ts` 的 `site` 改为你的真实域名，否则 sitemap / canonical / RSS 链接会指向占位地址。
+```bash
+bun install
+bun run build          # 输出 dist/
+bun run preview:cf     # 构建后用 Wrangler 本地预览 http://localhost:8787
+```
+
+### 首次手动部署
+
+```bash
+bunx wrangler login    # 浏览器授权 Cloudflare
+bun run deploy         # 构建并部署
+```
+
+部署配置见根目录 `wrangler.jsonc`：
+
+- Worker 名称：`run22-site`
+- 静态资源目录：`./dist`
+- 不存在的路由返回 `dist/404.html`
+
+### 环境变量
+
+评论系统使用 `PUBLIC_TWIKOO_ENV_ID`，它是**构建时变量**：
+
+- 本地：写入 `.env`
+- Cloudflare：在 Workers Builds 的 **Build Variables and Secrets** 中设置，然后重新构建
+
+### 自定义域名
+
+在 Cloudflare Dashboard 的 **Workers & Pages → run22-site → Settings → Domains & Routes** 绑定 `run22.top`。也可以在 `wrangler.jsonc` 中启用已注释的 `routes` 配置后重新部署。
+
+### 站点地址
+
+sitemap、canonical、OG、robots 依赖以下两处配置，部署前需与最终域名一致：
+
+- `astro.config.ts` 的 `site`
+- `src/site.config.ts` 的 `site.url`
+
+当前已配置为 `https://run22.top`。
+
+### 缓存与安全响应头
+
+`public/_headers` 会随构建复制到 `dist/`，由 Cloudflare Workers 解析：
+
+- `/_astro/*` 指纹资源长期缓存
+- 全站基础安全响应头
+
+### Git 自动部署（可选）
+
+连接 GitHub / GitLab 仓库到 Cloudflare Workers Builds：
+
+- Build command：`bun run build`
+- Deploy command：`bunx wrangler deploy`
+- 构建变量：`PUBLIC_TWIKOO_ENV_ID`
+
+> 部署平台统一为 Cloudflare Workers；`netlify.toml` 和 `vercel.json` 已移除。
 
 ## 📦 技术栈
 

@@ -4,6 +4,8 @@
 
 | 日期 | 任务类型 | 任务内容 |
 | --- | --- | --- |
+| 2026-10-26 | 优化 | 增加 Cloudflare Workers Static Assets 部署配置（`wrangler.jsonc`、`public/_headers`、Wrangler 脚本），站点地址切换为 `https://run22.top`。 |
+| 2026-10-26 | 文档维护 | README 部署章节改为 Cloudflare Workers CLI 流程；移除 `netlify.toml`、`vercel.json`。 |
 | 2026-10-25 | 文档维护 | 恢复 `README.md` 原始内容；新增本 changelog，用于记录后续任务的时间、类型和内容。 |
 | 2026-10-25 | 问题修复 | 修复文章标题较多时侧边目录超出视口、底部条目无法访问的问题，目录区域改为限高内部滚动。 |
 | 2026-10-25 | 功能验证 | 新增《OpenCode V2 初学者指南》，通过 5 级标题、52 个目录项验证树形目录的层级缩进、锚点跳转和滚动高亮。 |

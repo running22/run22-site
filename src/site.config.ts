@@ -27,9 +27,9 @@ export type SiteConfig = {
   /**
    * 评论系统配置
    * - enabled: 总开关
-   * - envId:  Twikoo 服务端地址（自部署时填 Vercel/Netlify 域名，
+   * - envId:  Twikoo 服务端地址（自部署时填自建域名，
    *           使用 Twikoo 官方云时填 `https://twikoo.zhheo.com`）
-   *           也可通过环境变量 `PUBLIC_TWIKOO_ENV_ID` 注入，便于 CI/CD
+   *           也可通过构建环境变量 `PUBLIC_TWIKOO_ENV_ID` 注入，便于 CI/CD
    */
   comments: {
     enabled: boolean;
@@ -42,7 +42,7 @@ const siteConfig: SiteConfig = {
     title: 'run22',
     description: '个人博客 — 技术笔记、教程与随笔',
     author: 'run22',
-    url: 'http://github.com/run22',
+    url: 'https://run22.top',
     language: 'zh-CN',
   },
   nav: [
@@ -66,8 +66,8 @@ const siteConfig: SiteConfig = {
   },
   comments: {
     enabled: true,
-    // 使用环境变量 PUBLIC_TWIKOO_ENV_ID 注入 Twikoo 服务端地址
-    // 需要到部署平台（如 Vercel、Netlify）设置环境变量 PUBLIC_TWIKOO_ENV_ID。
+    // 使用构建环境变量 PUBLIC_TWIKOO_ENV_ID 注入 Twikoo 服务端地址
+    // 本地开发写入 .env；Cloudflare 部署时写入 Workers Builds 的构建变量。
     // 详细环境ID参考：https://twikoo.js.org/backend.html
     envId: import.meta.env.PUBLIC_TWIKOO_ENV_ID,
   },
